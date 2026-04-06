@@ -1,7 +1,8 @@
 const GAS_URL = "https://script.google.com/macros/s/AKfycbwzobE-fvX2cRfHY-eqVmpBYOFqbFZbaUGxSW8YdBWtKk-7zYU5Zza4cEpZ-iMi9ss_2A/exec";
 const micBtn = document.getElementById('micBtn');
-const statusText = document.getElementById('status');
+const statusText = document.getElementById('statusText');
 const preview = document.getElementById('transcriptPreview');
+const loader = document.getElementById('loader');
 
 let recognition;
 let isRecording = false;
@@ -14,57 +15,54 @@ if ('webkitSpeechRecognition' in window) {
     recognition.onstart = () => {
         isRecording = true;
         micBtn.classList.add('recording');
-        statusText.innerText = "Listening...";
+        statusText.innerText = "Step 1: [🔴 Recording...]"; // Phase 3 UI Requirement
     };
 
     recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
+        statusText.innerText = "Step 2: [📝 Transcribing...]";
         preview.classList.remove('d-none');
         preview.innerText = transcript;
     };
 
-    recognition.onend = () => {
+    recognition.onend = async () => {
         isRecording = false;
         micBtn.classList.remove('recording');
-        statusText.innerText = "Processing with Gemini...";
-        sendToExPOS(preview.innerText);
-    };
-
-    recognition.onerror = (err) => {
-        statusText.innerText = "Error: " + err.error;
-        micBtn.classList.remove('recording');
+        if (preview.innerText) {
+            await processWithGemini(preview.innerText);
+        } else {
+            statusText.innerText = "No speech detected. Tap to try again.";
+        }
     };
 }
 
-micBtn.onclick = () => {
-    if (isRecording) {
-        recognition.stop();
-    } else {
-        recognition.start();
-    }
-};
+micBtn.onclick = () => isRecording ? recognition.stop() : recognition.start();
 
-async function sendToExPOS(text) {
-    if (!text) return;
+async function processWithGemini(text) {
+    statusText.innerText = "Step 3: [🤖 Sending to AI...]";
+    loader.classList.remove('d-none');
 
     try {
+        // Step 4: [⚙️ Parsing...] happens inside the GAS backend
         const response = await fetch(GAS_URL, {
             method: 'POST',
-            mode: 'no-cors', // The "Simple Request" hack
+            mode: 'no-cors', // Architectural bypass for GAS
             body: JSON.stringify({
                 action: 'PROCESS_TRANSCRIPT',
                 payload: { transcript: text, source: 'voice-mobile' }
             })
         });
 
-        statusText.innerText = "Sent! Check your INBOX sheet.";
-        setTimeout(() => { 
-            statusText.innerText = "Tap to start recording";
+        statusText.innerHTML = "Step 5: <span class='text-success'>[✅ Items ready in Pending Room]</span>";
+        setTimeout(() => {
             preview.classList.add('d-none');
-        }, 3000);
+            preview.innerText = "";
+            loader.classList.add('d-none');
+            statusText.innerText = "Tap to start recording";
+        }, 4000);
 
     } catch (error) {
-        statusText.innerText = "Upload failed. Check console.";
+        statusText.innerText = "Error sending to ExPOS.";
         console.error(error);
     }
 }
