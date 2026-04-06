@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExPOS | Pending Room</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #f4f7f6; padding-bottom: 100px; }
+        .card-pending { border-left: 5px solid #0d6efd; margin-bottom: 1rem; }
+        .badge-priority { font-size: 0.7rem; }
+        .nav-bottom { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #ddd; display: flex; justify-content: space-around; padding: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <header class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0">Pending Room</h1>
+            <button class="btn btn-sm btn-outline-primary" onclick="loadInbox()">🔄 Refresh</button>
+        </header>
+
+        <div id="inboxList">
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">Consulting the Chief of Staff...</p>
+            </div>
+        </div>
+    </div>
+
+    <nav class="nav-bottom shadow-lg">
+        <a href="index.html" class="text-decoration-none text-muted">🎤 Record</a>
+        <a href="pending.html" class="text-decoration-none text-primary fw-bold">📥 Pending</a>
+    </nav>
+
+    <script src="pending.js"></script>
+</body>
+</html>
